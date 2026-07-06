@@ -1,0 +1,37 @@
+============================================================
+    HUONG DAN SU DUNG TOOL CAU HINH IIS
+============================================================
+
+CACH CHAY:
+----------
+
+1. CHAY TRUC TIEP (THUC THI CAU HINH):
+   - Double-click vao file: CauHinhIIS.bat
+   - Tool se doc file Excel: ExcelCauHinh\Settup AXE.xlsx
+   - Sheet se doc: "Cài đặt IIS"
+   - Tool se thuc thi cac lenh appcmd de cau hinh IIS
+
+2. CHAY O CHE DO DRY RUN (XEM TRUOC):
+   - Double-click vao file: CauHinhIIS_DryRun.bat
+   - Tool se hien thi cac lenh se chay NHUNG KHONG thuc thi
+   - Dung de kiem tra truoc khi chay thuc te
+
+YEU CAU:
+--------
+- Phai chay voi quyen Administrator
+- Python phai duoc cai dat va co trong PATH
+- Cac thu vien pandas va openpyxl se duoc tu dong cai dat neu chua co
+
+FILE EXCEL:
+-----------
+- Duong dan: ExcelCauHinh\Settup AXE.xlsx
+- Sheet can doc: "Cài đặt IIS"
+- Tool se tu dong doc cac lenh appcmd tu sheet nay
+
+LUU Y:
+------
+- Luon chay Dry Run truoc de kiem tra
+- Backup cau hinh IIS hien tai truoc khi chay
+- Dam bao cac duong dan trong Excel la dung va ton tai
+
+============================================================

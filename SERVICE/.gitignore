@@ -1,0 +1,22 @@
+# PyInstaller build files
+build/
+dist/
+*.spec.bak
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environment
+venv/
+env/
+ENV/
+
+# Excel temp files
+~$*.xlsx
+~$*.xls
+
+# Logs
+*.log

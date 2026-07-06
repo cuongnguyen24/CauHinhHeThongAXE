@@ -1,0 +1,106 @@
+============================================================
+    HUONG DAN SU DUNG TOOL CAU HINH SQL SERVER
+============================================================
+
+CHUC NANG:
+----------
+Tool tu dong doc file Excel (sheet "Cài đặt SQL") va thuc hien:
+1. Tao SQL Login (user moi) neu chua co
+2. Restore nhieu database tu file .bak
+3. Tao user va gan quyen cho tung database
+4. Ho tro xoa database cu va restore lai (che do Clean)
+
+CAC FILE BAT:
+-------------
+
+1. CauHinhSQL.bat - CHAY CAU HINH (RESTORE)
+   - Double-click (hoac click phai -> Run as administrator)
+   - Restore cac database tu file .bak
+   - Neu database da ton tai se bao loi (dung Clean de xoa truoc)
+
+2. CauHinhSQL_DryRun.bat - XEM TRUOC (KHONG THUC THI)
+   - Hien thi script SQL se chay nhung KHONG thuc thi
+   - Luon chay truoc de kiem tra
+
+3. CauHinhSQL_Clean.bat - XOA DATABASE CU + RESTORE LAI
+   - XOA tat ca database cu truoc khi restore
+   - Dung khi muon lam lai tu dau
+   - CO CANH BAO truoc khi xoa
+
+YEU CAU:
+--------
+- NEN chay voi quyen Administrator
+- Python phai duoc cai dat va co trong PATH
+- SQL Server phai duoc cai dat tren may
+- sqlcmd phai co the truy cap duoc
+- Cac file .bak phai ton tai tai duong dan trong Excel
+- Thu muc chua file .mdf va .ldf phai ton tai
+
+CAU TRUC FILE EXCEL:
+--------------------
+Sheet "Cài đặt SQL" can co cau truc nhu sau:
+
+  PHAN 1 - THONG TIN CHUNG:
+  +----------------------------------+----------------+
+  | Đường dẫn gốc chứa file bak     | E:\BACKUP\     |
+  | Đường dẫn gốc chứa database     | E:\DATABASE\   |
+  | Tên User mới                     | dev            |
+  | Password                         | 123456         |
+  +----------------------------------+----------------+
+
+  PHAN 2 - SQL CHUAN BI (o cot cuoi):
+  - DECLARE @DataLogicalName NVARCHAR(128);...
+  - CREATE TABLE #FileList (...)
+
+  PHAN 3 - DANH SACH DATABASE (moi dong = 1 database):
+  +------------------+-------------------+---------------+-----------+-----------+-----+
+  | Ten file .bak    | Duong dan .bak    | Ten DB restore| Path .mdf | Path .ldf | SQL |
+  +------------------+-------------------+---------------+-----------+-----------+-----+
+  | AXE_CORE_ACC.bak | E:\BACKUP\...     | AXE_CORE_ACC  | E:\DB\... | E:\DB\... | ... |
+  +------------------+-------------------+---------------+-----------+-----------+-----+
+  Cot cuoi chua script SQL day du (INSERT, RESTORE, CREATE USER, ALTER ROLE)
+
+QUY TRINH TOOL CHAY:
+---------------------
+1. Doc Excel -> parse thong tin
+2. Tao SQL Login (IF NOT EXISTS - an toan)
+3. Tao bang tam #FileList
+4. [Neu Clean] Xoa cac database cu
+5. Restore tung database tu file .bak (moi DB = 1 batch rieng)
+6. Tao user va gan quyen cho tung database
+
+DAC DIEM KY THUAT:
+------------------
+- Moi database duoc xu ly trong 1 batch rieng (phan cach bang GO)
+  -> Loi o 1 database KHONG anh huong den cac database khac
+- Bien DECLARE duoc khai bao lai trong moi batch
+- Bang tam #FileList ton tai xuyen suot cac batch
+- Su dung Windows Authentication de ket noi SQL Server
+
+TROUBLESHOOTING:
+----------------
+
+1. Loi "Incorrect syntax near '.'":
+   - Ten database trong Excel co chua dau cham (vd: "AXE_CORE_CNF.bak")
+   - Sua lai ten database trong Excel (bo .bak khoi ten)
+
+2. Loi "Must declare the scalar variable":
+   - Tool da xu ly van de nay bang cach khai bao lai DECLARE trong moi batch
+
+3. Loi "File .bak khong ton tai":
+   - Kiem tra duong dan file .bak trong Excel
+   - Dam bao file .bak da duoc copy vao dung thu muc
+
+4. Loi "Database da ton tai":
+   - Chay CauHinhSQL_Clean.bat de xoa database cu truoc
+   - Hoac xoa thu cong trong SQL Server Management Studio
+
+5. Loi "sqlcmd khong tim thay":
+   - Cai dat SQL Server Command Line Utilities
+   - Hoac chi dinh: python sql_config_tool.py --sqlcmd "path\to\sqlcmd.exe"
+
+6. Loi "Khong du quyen":
+   - Chay file .bat voi quyen Administrator
+   - Kiem tra quyen tren SQL Server
+
+============================================================

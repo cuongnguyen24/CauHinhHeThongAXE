@@ -1,0 +1,104 @@
+============================================================
+    HUONG DAN SU DUNG TOOL CAU HINH WINDOWS SERVICE
+============================================================
+
+CHUC NANG:
+----------
+Tool tu dong doc file Excel (sheet "Cài đặt service") va thuc hien:
+1. Tao Windows Service tu file .exe
+2. Cau hinh service tu dong khoi dong (start= auto)
+3. Ho tro xoa service cu va tao lai (che do Clean)
+
+CAC FILE BAT:
+-------------
+
+1. CauHinhService.bat - CHAY CAU HINH (TAO SERVICE)
+   - Click chuot phai -> "Run as administrator" (BAT BUOC!)
+   - Tao cac Windows Service tu file .exe trong Excel
+   - Neu service da ton tai se bao loi (dung Clean de xoa truoc)
+
+2. CauHinhService_DryRun.bat - XEM TRUOC (KHONG THUC THI)
+   - Hien thi cac lenh se chay nhung KHONG thuc thi
+   - Luon chay truoc de kiem tra
+
+3. CauHinhService_Clean.bat - XOA SERVICE CU (CHI XOA, KHONG TAO MOI)
+   - CHI XOA tat ca service cu (khong tao lai)
+   - Sau khi xoa, chay CauHinhService.bat de tao lai
+   - CO CANH BAO truoc khi xoa
+
+YEU CAU:
+--------
+- PHAI chay voi quyen Administrator (bat buoc!)
+- Python phai duoc cai dat va co trong PATH
+- Cac file .exe service phai ton tai tai duong dan trong Excel
+- Cac thu vien pandas va openpyxl se duoc tu dong cai dat neu chua co
+
+CAU TRUC FILE EXCEL:
+--------------------
+Sheet "Cài đặt service" can co cau truc:
+
+  +----------------------------------+------------------+-----+-------------------+
+  | Nội dung                          | Giá trị cần nhập | ... | Lệnh sc create    |
+  +----------------------------------+------------------+-----+-------------------+
+  | Tên Service OCR                   | AXEServiceOCR    | ... | sc create ...     |
+  | Đường dẫn gốc chứa app Service   | E:\Path\...exe  | ... |                   |
+  | Tên Service Export                | AXEServiceExport | ... | sc create ...     |
+  | Đường dẫn gốc chứa app Service   | E:\Path\...exe  | ... |                   |
+  +----------------------------------+------------------+-----+-------------------+
+
+  Moi service = 2 dong:
+  - Dong 1: "Tên Service XXX" | "TenService" | ... | "sc create ..."
+  - Dong 2: "Đường dẫn gốc chứa app Service XXX" | "E:\Path\Service.exe"
+
+QUY TRINH TOOL CHAY:
+---------------------
+1. Doc Excel -> parse thong tin service
+2. [Neu Clean] Xoa cac service cu (stop + delete)
+3. Kiem tra file .exe co ton tai khong
+4. Kiem tra service da ton tai chua
+5. Tao service bang lenh sc create
+
+DAC DIEM KY THUAT:
+------------------
+- Su dung sc.exe (Service Control) de tao service
+- Format lenh: sc create ServiceName binPath= "Path\To\Service.exe" start= auto
+- Tool tu dong kiem tra service da ton tai chua
+- Neu co lenh sc create san trong Excel, se su dung lenh do
+- Neu khong, tool se tu dong tao lenh tu ten service va duong dan exe
+
+TROUBLESHOOTING:
+----------------
+
+1. Loi "Access is denied" hoac "The requested operation requires elevation":
+   - PHAI chay file .bat voi quyen Administrator
+   - Click chuot phai -> "Run as administrator"
+
+2. Loi "File khong ton tai":
+   - Kiem tra duong dan file .exe trong Excel co dung khong
+   - Dam bao file .exe da duoc build va ton tai
+
+3. Loi "Service da ton tai":
+   - Chay CauHinhService_Clean.bat de xoa service cu truoc
+   - Hoac xoa thu cong: sc delete ServiceName
+
+4. Loi "Python chua duoc cai dat":
+   - Cai dat Python tu python.org
+   - Them Python vao PATH
+
+5. Loi "Khong parse duoc du lieu":
+   - Kiem tra cau truc file Excel co dung format khong
+   - Dam bao co dong "Tên Service" va "Đường dẫn gốc chứa app Service"
+
+6. Service tao thanh cong nhung khong chay:
+   - Kiem tra file .exe co phai la Windows Service khong
+   - Kiem tra service co duoc cau hinh dung khong
+   - Chay thu: sc start ServiceName
+
+LUU Y:
+------
+- LUON chay Dry Run truoc de kiem tra
+- BACKUP service hien tai truoc khi chay Clean
+- Dam bao cac file .exe la Windows Service (khong phai console app)
+- Kiem tra quyen Administrator truoc khi chay
+
+============================================================

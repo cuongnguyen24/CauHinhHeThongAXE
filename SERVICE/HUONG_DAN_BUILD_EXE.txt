@@ -1,0 +1,101 @@
+================================================================
+    HƯỚNG DẪN BUILD TOOL THÀNH FILE EXE
+================================================================
+
+VẤN ĐỀ:
+- Tool cần Python và các thư viện pandas, openpyxl
+- Máy khách hàng có thể không có Python
+- Cần giải pháp chạy được trên mọi máy Windows
+
+GIẢI PHÁP:
+- Build tool thành file .EXE độc lập
+- File .EXE chứa sẵn Python và tất cả thư viện
+- Không cần cài đặt gì trên máy khách hàng
+
+================================================================
+    CÁCH 1: BUILD BẰNG SCRIPT TỰ ĐỘNG (KHUYẾN NGHỊ)
+================================================================
+
+1. Đảm bảo máy của bạn đã cài Python
+
+2. Chạy file: build_exe.bat
+   - Script sẽ tự động:
+     + Kiểm tra và cài PyInstaller
+     + Cài đặt các thư viện cần thiết
+     + Build tool thành file .exe
+
+3. Sau khi build xong, file .exe sẽ nằm trong thư mục: dist\
+
+4. Copy toàn bộ thư mục SERVICE sang máy khách hàng:
+   - SERVICE\
+     ├── dist\
+     │   └── service_config_tool.exe  ← File EXE đã build
+     ├── ExcelCauHinh\
+     │   └── Settup AXE.xlsx
+     ├── CauHinhService.bat           ← File chạy chính
+     └── CauHinhService_DryRun.bat
+
+5. Trên máy khách hàng, chỉ cần chạy: CauHinhService.bat
+   - Script sẽ tự động dùng file .exe (không cần Python)
+
+================================================================
+    CÁCH 2: BUILD THU CÔNG
+================================================================
+
+1. Cài PyInstaller:
+   pip install pyinstaller
+
+2. Cài các thư viện:
+   pip install -r requirements.txt
+
+3. Build:
+   pyinstaller --clean --noconfirm service_config_tool.spec
+
+4. File .exe sẽ nằm trong: dist\service_config_tool.exe
+
+================================================================
+    CÁCH SỬ DỤNG TRÊN MÁY KHÁCH HÀNG
+================================================================
+
+SAU KHI ĐÃ BUILD:
+
+1. Copy toàn bộ thư mục SERVICE sang máy khách hàng
+
+2. Chỉnh sửa file Excel: ExcelCauHinh\Settup AXE.xlsx
+
+3. Chạy file: CauHinhService.bat
+   - Nếu có file .exe → Chạy .exe (không cần Python)
+   - Nếu không có .exe → Chạy Python (cần cài Python)
+
+4. Để test trước khi chạy thật:
+   - Chạy: CauHinhService_DryRun.bat
+
+================================================================
+    LƯU Ý
+================================================================
+
+✓ File .exe có kích thước lớn (~50-100MB) vì chứa Python và thư viện
+✓ Chỉ cần build 1 lần, sau đó dùng mãi mãi
+✓ File .exe chạy được trên mọi máy Windows (không cần cài gì)
+✓ Nếu cập nhật code, cần build lại file .exe
+
+✗ Không nên commit file .exe vào Git (quá lớn)
+✗ Nên build trên máy Windows để đảm bảo tương thích
+
+================================================================
+    KHẮC PHỤC SỰ CỐ
+================================================================
+
+NẾU BUILD BỊ LỖI:
+1. Kiểm tra Python đã cài đúng chưa: python --version
+2. Cập nhật pip: python -m pip install --upgrade pip
+3. Cài lại PyInstaller: pip install --upgrade pyinstaller
+4. Chạy lại: build_exe.bat
+
+NẾU FILE .EXE CHẠY BỊ LỖI:
+1. Kiểm tra file Excel có đúng định dạng không
+2. Chạy bằng Python để xem lỗi chi tiết:
+   python service_config_tool.py "ExcelCauHinh\Settup AXE.xlsx" --sheet "Cài đặt service"
+3. Nếu Python chạy OK nhưng .exe lỗi → Build lại
+
+================================================================
