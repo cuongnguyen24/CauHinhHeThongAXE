@@ -30,8 +30,8 @@ GIẢI PHÁP:
    - SERVICE\
      ├── dist\
      │   └── service_config_tool.exe  ← File EXE đã build
-     ├── ExcelCauHinh\
-     │   └── Settup AXE.xlsx
+   - ..\ExcelCauHinh\
+     └── Settup AXE.xlsx
      ├── CauHinhService.bat           ← File chạy chính
      └── CauHinhService_DryRun.bat
 
@@ -61,7 +61,7 @@ SAU KHI ĐÃ BUILD:
 
 1. Copy toàn bộ thư mục SERVICE sang máy khách hàng
 
-2. Chỉnh sửa file Excel: ExcelCauHinh\Settup AXE.xlsx
+2. Chỉnh sửa file Excel: ..\ExcelCauHinh\Settup AXE.xlsx
 
 3. Chạy file: CauHinhService.bat
    - Nếu có file .exe → Chạy .exe (không cần Python)
@@ -95,7 +95,7 @@ NẾU BUILD BỊ LỖI:
 NẾU FILE .EXE CHẠY BỊ LỖI:
 1. Kiểm tra file Excel có đúng định dạng không
 2. Chạy bằng Python để xem lỗi chi tiết:
-   python service_config_tool.py "ExcelCauHinh\Settup AXE.xlsx" --sheet "Cài đặt service"
+   python service_config_tool.py "..\ExcelCauHinh\Settup AXE.xlsx" --sheet "Cài đặt service"
 3. Nếu Python chạy OK nhưng .exe lỗi → Build lại
 
 ================================================================

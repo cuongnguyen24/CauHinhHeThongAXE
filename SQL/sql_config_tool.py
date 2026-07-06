@@ -612,11 +612,11 @@ def main():
     
     # Nếu không có excel_file, dùng đường dẫn mặc định
     if not args.excel_file:
-        default_excel = r"C:\Users\Admin\Desktop\ToolAXE\CauHinhHeThongAXE\SQL\ExcelCauHinh\Settup AXE.xlsx"
+        default_excel = str(Path(__file__).resolve().parent.parent / "ExcelCauHinh" / "Settup AXE.xlsx")
         if os.path.exists(default_excel):
             args.excel_file = default_excel
             if not args.sheet:
-                args.sheet = "Cài đặt SQL"
+                args.sheet = "SQL"
         else:
             print("Lỗi: Không tìm thấy file Excel mặc định")
             print(f"Đường dẫn mong đợi: {default_excel}")

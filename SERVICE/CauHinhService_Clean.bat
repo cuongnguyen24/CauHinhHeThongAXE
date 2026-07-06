@@ -15,8 +15,8 @@ pause
 
 REM Lấy đường dẫn thư mục chứa file .bat
 set "SCRIPT_DIR=%~dp0"
-set "EXCEL_FILE=%SCRIPT_DIR%ExcelCauHinh\Settup AXE.xlsx"
-set "SHEET_NAME=Cài đặt service"
+set "EXCEL_FILE=%SCRIPT_DIR%..\ExcelCauHinh\Settup AXE.xlsx"
+set "SHEET_NAME=service"
 
 REM Kiểm tra file Excel có tồn tại không
 if not exist "%EXCEL_FILE%" (

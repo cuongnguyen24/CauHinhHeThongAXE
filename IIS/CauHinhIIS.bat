@@ -9,8 +9,8 @@ echo.
 
 REM Lấy đường dẫn thư mục chứa file .bat
 set "SCRIPT_DIR=%~dp0"
-set "EXCEL_FILE=%SCRIPT_DIR%ExcelCauHinh\Settup AXE.xlsx"
-set "SHEET_NAME=Cài đặt IIS"
+set "EXCEL_FILE=%SCRIPT_DIR%..\ExcelCauHinh\Settup AXE.xlsx"
+set "SHEET_NAME=IIS"
 set "EXE_FILE=%SCRIPT_DIR%dist\iis_config_tool.exe"
 
 REM Kiểm tra file Excel có tồn tại không

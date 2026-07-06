@@ -64,7 +64,18 @@ class IISConfigTool:
                             print(f"\nTìm thấy sheet tương tự: '{s}' (tìm '{sheet_name}')")
                             df = pd.read_excel(self.excel_path, sheet_name=s)
                             return {s: df}
-                    print(f"\nCảnh báo: Không tìm thấy sheet '{sheet_name}', đọc tất cả sheets")
+
+                    if 'iis' in sheet_lower:
+                        for s in sheets:
+                            if 'iis' in s.lower():
+                                print(f"\nTim thay sheet IIS: '{s}' (tim '{sheet_name}')")
+                                df = pd.read_excel(self.excel_path, sheet_name=s)
+                                return {s: df}
+
+                    raise ValueError(
+                        f"Khong tim thay sheet '{sheet_name}'. "
+                        f"Cac sheet hien co: {', '.join(sheets)}"
+                    )
             
             # Đọc từng sheet
             data = {}
@@ -648,11 +659,11 @@ def main():
     
     # Nếu không có excel_file, dùng đường dẫn mặc định
     if not args.excel_file:
-        default_excel = r"C:\Users\Admin\Desktop\ToolAXE\CauHinhHeThongAXE\IIS\ExcelCauHinh\Settup AXE.xlsx"
+        default_excel = str(Path(__file__).resolve().parent.parent / "ExcelCauHinh" / "Settup AXE.xlsx")
         if os.path.exists(default_excel):
             args.excel_file = default_excel
             if not args.sheet:
-                args.sheet = "Cài đặt IIS"
+                args.sheet = "IIS"
         else:
             print("Lỗi: Không tìm thấy file Excel mặc định")
             print(f"Đường dẫn mong đợi: {default_excel}")

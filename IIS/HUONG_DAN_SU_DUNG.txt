@@ -7,7 +7,7 @@ CACH CHAY:
 
 1. CHAY TRUC TIEP (THUC THI CAU HINH):
    - Double-click vao file: CauHinhIIS.bat
-   - Tool se doc file Excel: ExcelCauHinh\Settup AXE.xlsx
+   - Tool se doc file Excel: ..\ExcelCauHinh\Settup AXE.xlsx
    - Sheet se doc: "Cài đặt IIS"
    - Tool se thuc thi cac lenh appcmd de cau hinh IIS
 
@@ -24,7 +24,7 @@ YEU CAU:
 
 FILE EXCEL:
 -----------
-- Duong dan: ExcelCauHinh\Settup AXE.xlsx
+- Duong dan: ..\ExcelCauHinh\Settup AXE.xlsx
 - Sheet can doc: "Cài đặt IIS"
 - Tool se tu dong doc cac lenh appcmd tu sheet nay
 
