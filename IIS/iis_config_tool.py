@@ -12,6 +12,9 @@ from typing import Dict, List, Optional, Tuple
 import json
 import io
 import re
+import shutil
+from datetime import datetime
+import xml.etree.ElementTree as ET
 
 # Fix encoding for Windows console
 if sys.platform == 'win32':
@@ -34,6 +37,173 @@ class IISConfigTool:
         self.excel_path = excel_path
         self.appcmd_path = appcmd_path
         self.config = {}
+
+    def _find_sheet_name(self, sheet_hint: str) -> Optional[str]:
+        excel_file = pd.ExcelFile(self.excel_path)
+        sheets = excel_file.sheet_names
+        hint = sheet_hint.lower()
+
+        for sheet in sheets:
+            if sheet.lower() == hint:
+                return sheet
+        for sheet in sheets:
+            sheet_lower = sheet.lower()
+            if hint in sheet_lower or sheet_lower in hint:
+                return sheet
+        for sheet in sheets:
+            if 'iis' in hint and 'iis' in sheet.lower():
+                return sheet
+            if 'webconfig' in hint and 'webconfig' in sheet.lower():
+                return sheet
+        return None
+
+    def _read_sheet_raw(self, sheet_hint: str) -> Optional[pd.DataFrame]:
+        sheet_name = self._find_sheet_name(sheet_hint)
+        if not sheet_name:
+            print(f"Canh bao: Khong tim thay sheet '{sheet_hint}'")
+            return None
+        return pd.read_excel(self.excel_path, sheet_name=sheet_name, header=None)
+
+    def _cell_text(self, value) -> str:
+        if pd.isna(value):
+            return ''
+        text = str(value).strip()
+        if text.lower() == 'nan':
+            return ''
+        return text.strip().strip('"').strip("'")
+
+    def _parse_add_snippets(self, df: pd.DataFrame, excel_rows: List[int]) -> List[Dict]:
+        snippets = []
+        for excel_row in excel_rows:
+            row_idx = excel_row - 1
+            if row_idx < 0 or row_idx >= len(df):
+                continue
+            for value in df.iloc[row_idx].tolist():
+                text = self._cell_text(value)
+                if '<add ' not in text.lower():
+                    continue
+                try:
+                    element = ET.fromstring(text)
+                    if element.tag.lower().endswith('add'):
+                        snippets.append(dict(element.attrib))
+                except ET.ParseError as exc:
+                    print(f"Canh bao: Khong doc duoc XML snippet o dong {excel_row}: {exc}")
+        return snippets
+
+    def _load_webconfig_sheet(self) -> Dict:
+        df = self._read_sheet_raw('Webconfig')
+        if df is None:
+            return {'connection_strings': [], 'dard_app_settings': []}
+
+        return {
+            'connection_strings': self._parse_add_snippets(df, [4, 5, 6, 7, 8, 9]),
+            'dard_app_settings': self._parse_add_snippets(df, [12, 15]),
+        }
+
+    def _get_dard_physical_path(self) -> Optional[str]:
+        df = self._read_sheet_raw('IIS')
+        if df is None:
+            return None
+
+        for _, row in df.iterrows():
+            values = [self._cell_text(value) for value in row.tolist()]
+            if len(values) < 2:
+                continue
+            if values[0].lower() == 'axe1_web' and values[1]:
+                return values[1]
+
+        for _, row in df.iterrows():
+            values = [self._cell_text(value) for value in row.tolist()]
+            for value in values:
+                if value.lower().endswith('\\dard') or value.lower().endswith('/dard'):
+                    return value
+        return None
+
+    def _ensure_config_section(self, root: ET.Element, section_name: str) -> ET.Element:
+        section = root.find(section_name)
+        if section is None:
+            section = ET.Element(section_name)
+            root.insert(0, section)
+        return section
+
+    def _upsert_add_node(self, section: ET.Element, match_attr: str, attrs: Dict) -> bool:
+        match_value = attrs.get(match_attr)
+        if not match_value:
+            return False
+
+        target = None
+        for child in section.findall('add'):
+            if child.get(match_attr) == match_value:
+                target = child
+                break
+
+        if target is None:
+            ET.SubElement(section, 'add', attrs)
+        else:
+            for key, value in attrs.items():
+                target.set(key, value)
+        return True
+
+    def _update_xml_config(self, config_path: str, connection_strings: List[Dict],
+                           app_settings: List[Dict], dry_run: bool, label: str) -> bool:
+        if not connection_strings and not app_settings:
+            print(f"\nKhong co cau hinh web.config cho {label}")
+            return True
+
+        print(f"\nCap nhat config cho {label}: {config_path}")
+        print(f"  ConnectionStrings: {len(connection_strings)}")
+        print(f"  AppSettings: {len(app_settings)}")
+
+        if dry_run:
+            for item in connection_strings:
+                print(f"  [DRY RUN] connectionString: {item.get('name')}")
+            for item in app_settings:
+                print(f"  [DRY RUN] appSetting: {item.get('key')}")
+            return True
+
+        if not os.path.exists(config_path):
+            print(f"  Loi: Khong tim thay file config: {config_path}")
+            return False
+
+        try:
+            backup_path = f"{config_path}.bak_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+            shutil.copy2(config_path, backup_path)
+
+            tree = ET.parse(config_path)
+            root = tree.getroot()
+            connection_section = self._ensure_config_section(root, 'connectionStrings')
+            app_section = self._ensure_config_section(root, 'appSettings')
+
+            for item in connection_strings:
+                self._upsert_add_node(connection_section, 'name', item)
+            for item in app_settings:
+                self._upsert_add_node(app_section, 'key', item)
+
+            if hasattr(ET, 'indent'):
+                ET.indent(tree, space='  ')
+            tree.write(config_path, encoding='utf-8', xml_declaration=True)
+            print(f"  Da backup: {backup_path}")
+            print(f"  Da cap nhat: {config_path}")
+            return True
+        except Exception as exc:
+            print(f"  Loi cap nhat config: {exc}")
+            return False
+
+    def update_dard_webconfig(self, dry_run: bool = False) -> bool:
+        webconfig_data = self._load_webconfig_sheet()
+        dard_path = self._get_dard_physical_path()
+        if not dard_path:
+            print("\nCanh bao: Khong xac dinh duoc thu muc dard tu sheet IIS")
+            return False
+
+        config_path = os.path.join(dard_path, 'Web.config')
+        return self._update_xml_config(
+            config_path=config_path,
+            connection_strings=webconfig_data['connection_strings'],
+            app_settings=webconfig_data['dard_app_settings'],
+            dry_run=dry_run,
+            label='dard'
+        )
         
     def read_excel(self, sheet_name: str = None) -> Dict:
         """
@@ -637,6 +807,11 @@ class IISConfigTool:
                     app_path = app.get('path', f"/{app['name']}")
                     self.set_app_pool_for_app(app['site_name'], app_path, app_pool_name, dry_run)
         
+        print("\n" + "=" * 60)
+        print("CAP NHAT WEBCONFIG CHO DARD")
+        print("=" * 60)
+        self.update_dard_webconfig(dry_run=dry_run)
+
         print("\n" + "=" * 60)
         print("HOÀN TẤT CẤU HÌNH")
         print("=" * 60)
