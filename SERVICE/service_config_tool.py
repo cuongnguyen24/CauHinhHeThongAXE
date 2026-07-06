@@ -184,15 +184,20 @@ class ServiceConfigTool:
                 continue
 
             config_path = exe_path + '.config'
+            config_type = service.get('config_type', '').lower()
             name_lower = name.lower()
-            if 'export' in name_lower:
+            if not config_type:
+                config_type = name_lower
+
+            if 'export' in config_type:
                 app_settings = webconfig_data['export_app_settings']
                 label = name or 'ServiceExport'
-            elif 'ocr' in name_lower:
+            elif 'ocr' in config_type:
                 app_settings = webconfig_data['ocr_app_settings']
                 label = name or 'ServiceOCR'
             else:
                 print(f"\nBo qua cap nhat config cho service khong xac dinh loai: {name}")
+                print("  Goi y: nhap OCR hoac EXPORT vao cot Ghi chu cua dong Ten Service")
                 continue
 
             if not self._update_xml_config(
@@ -262,12 +267,17 @@ class ServiceConfigTool:
                     'display_name': '',
                     'exe_path': '',
                     'sc_command': '',
+                    'config_type': '',
                 }
                 
                 # Lấy tên service từ cột 1
                 if num_cols > 1 and pd.notna(row[1]):
                     service_info['name'] = str(row[1]).strip()
                     service_info['display_name'] = service_info['name']
+
+                # Lay loai config tu cot Ghi chu: OCR / EXPORT
+                if num_cols > 2 and pd.notna(row[2]):
+                    service_info['config_type'] = str(row[2]).strip()
                 
                 # Lấy lệnh sc create từ cột cuối (thường là cột 3)
                 for col_idx in range(num_cols - 1, -1, -1):
